@@ -30,6 +30,7 @@ models/*.pkl
 data/*.csv
 data/*.json
 logs/*.log
+datascience/data/raw/*
 
 # Ambiente
 .env
