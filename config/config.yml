@@ -10,3 +10,5 @@ data:
 
   feature_eng:
     janela: 5
+    features_X: ['open', 'high', 'low', 'volume']
+    features_y: ['close']

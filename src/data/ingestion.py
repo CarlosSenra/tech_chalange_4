@@ -32,12 +32,9 @@ class Ingestion():
         # Buscar dados
         url = f"https://brapi.dev/api/quote/{self.ticker}"
         logger.info(f"Buscando dados para o ticker {self.ticker}")
-        logger.info(f"Período: {self.range_period}")
-        logger.info(f"Intervalo: {self.interval}")
         params = {"range": self.range_period, "interval": self.interval}
         logger.info(f"Parâmetros: {params}")
         response = requests.get(url, params=params)
-        logger.info(f"Resposta: {response.json()}")
         data = response.json()
         result = data['results'][0]
         
