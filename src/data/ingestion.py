@@ -1,17 +1,28 @@
 import requests
+import logging
 from typing import Optional
 import pandas as pd
 import os 
+from pathlib import Path
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+)
 
-class get_data():
-    def __init__(self,ticker:str, range_period:str="5y"):
+logger = logging.getLogger(__name__)
+
+class Ingestion():
+    def __init__(self,ticker:str, range_period:str, interval:str, raw_path:str, staging_path:str):
         self.ticker=ticker
         self.range_period=range_period
+        self.interval=interval
+        self.raw_path=raw_path
+        self.staging_path=staging_path
 
-    def save_data(self,path:str,file_name:str) -> None:
+    def save_raw_data(self) -> None:
         df = self.get_stock_data_brapi()
-        df.to_csv(os.path.join('.','datascience', 'data', 'raw', f'{file_name}.csv'))
+        df.to_csv(Path(self.raw_path, f'{self.ticker}.csv').resolve())
 
     def get_stock_data_brapi(self):
         """
@@ -20,9 +31,13 @@ class get_data():
         
         # Buscar dados
         url = f"https://brapi.dev/api/quote/{self.ticker}"
-        params = {"range": self.range_period, "interval": "1d"}
-        
+        logger.info(f"Buscando dados para o ticker {self.ticker}")
+        logger.info(f"Período: {self.range_period}")
+        logger.info(f"Intervalo: {self.interval}")
+        params = {"range": self.range_period, "interval": self.interval}
+        logger.info(f"Parâmetros: {params}")
         response = requests.get(url, params=params)
+        logger.info(f"Resposta: {response.json()}")
         data = response.json()
         result = data['results'][0]
         
@@ -52,11 +67,13 @@ class get_data():
         df['target'] = df['close'].shift(-1)
         
         # Remover NaN
-        df = df.dropna()
+        #df = df.dropna()
         
         if df is not None:
             print(f"✓ {len(df)} registros coletados")
             print(f"Período: {df.index[0].date()} até {df.index[-1].date()}")
+            self.date_inicial = df.index[0].date()
+            self.date_final = df.index[-1].date()
             
             return df
         else:
@@ -64,5 +81,6 @@ class get_data():
 
 if __name__ == '__main__':
 
-    getter = get_data("ITUB4", range_period="1y")
-    getter.save_data('raw','ITUB4')
+    getter = Ingestion("ITUB4", range_period="1y")
+    getter.save_data('raw',f'ITUB4')
+    

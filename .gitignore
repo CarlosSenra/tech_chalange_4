@@ -27,6 +27,8 @@ wheels/
 models/*.keras
 models/*.h5
 models/*.pkl
+data/raw/*
+data/staging/*
 data/*.csv
 data/*.json
 logs/*.log

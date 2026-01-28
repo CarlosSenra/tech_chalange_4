@@ -1,0 +1,12 @@
+data:
+  path:
+    raw: 'data/raw/' 
+    staging: 'data/staging/'
+
+  ingestion:
+    ticker: 'ITUB4'
+    range_period: '1y'
+    interval: '1d'
+
+  feature_eng:
+    janela: 5
