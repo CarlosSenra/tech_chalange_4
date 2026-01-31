@@ -11,6 +11,14 @@ if __name__ == '__main__':
 
     feature_eng = container.feature_eng()
     x_train, y_train, x_test, y_test = feature_eng.run(janela=5)
+    print(x_train[:5])
+    print(y_train[:5])
+    print(x_test[:5])
+    print(y_test[:5])
+    print(x_train.shape)
+    print(y_train.shape)
+    print(x_test.shape)
+    print(y_test.shape)
     
     x_train, y_train = feature_eng.reverse_sequences(x_train, y_train)
     x_test, y_test = feature_eng.reverse_sequences(x_test, y_test)
@@ -22,3 +30,6 @@ if __name__ == '__main__':
     print(y_train.shape)
     print(x_test.shape)
     print(y_test.shape)
+
+    train = container.train()
+    train.run()

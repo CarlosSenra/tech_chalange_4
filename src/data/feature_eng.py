@@ -28,7 +28,7 @@ class FeatureEng():
         self.__reception_data()
 
 
-    def run(self, janela:int) -> tuple[np.array, np.array]:
+    def run(self, janela:int) -> tuple[np.array, np.array, np.array, np.array]:
         try:
             logger.info(f"Iniciando Feature Engineering para o ticker {self.ticker}")
             self.__reception_data()
@@ -42,17 +42,21 @@ class FeatureEng():
             raise e
 
     def reverse_sequences(self, _X:np.array, _y:np.array) -> tuple[np.array, np.array]:
+        logger.debug(f"_X shape:{_X.shape}")
+        logger.debug(f"_y shape:{_y.shape}")
         try:
-            logger.debug(f"_X shape:{_X.shape}")
-            logger.debug(f"_y shape:{_y.shape}")
-            __X = self.scaler_X.inverse_transform(_X.reshape(-1, _X.shape[-1]))
-           #__y = self.scaler_y.inverse_transform(_y.reshape(1, _y.shape[-1]))
+            __X = _X.reshape(-1, _X.shape[-1])
+            __X = self.scaler_X.inverse_transform(__X)
+            
+            __y = _y.reshape(-1, _y.shape[-2])
+            __y = self.scaler_y.inverse_transform(__y)
+            
             logger.debug(f"__X shape:{__X.shape}")
-            #logger.debug(f"__y shape:{__y.shape}")
+            logger.debug(f"__y shape:{__y.shape}")
+            return __X, __y
         except Exception as e:
             logger.error(f"Erro ao inverter sequências para o ticker {self.ticker}: {e}")
             raise e
-        return __X#, __y
 
     def __reception_data(self):
         try:

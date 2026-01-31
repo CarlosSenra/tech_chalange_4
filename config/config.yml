@@ -13,3 +13,18 @@ data:
     test_size: 0.2
     features_X: ['open', 'high', 'low', 'volume']
     features_y: ['close']
+
+models:
+  lstm:
+    SimpleLSTM:
+      list_units: [150, 100, 50]
+      output_dim: 5 
+  train:
+    experiment_name: "LSTM"
+    epochs: 100
+    batch_size: 32
+    validation_split: 0.2
+    verbose: 0
+    metric_list: ["mae", "mse"]
+    optimizer: "adam"
+    loss: "mse"
