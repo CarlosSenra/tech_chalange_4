@@ -9,10 +9,9 @@ class SimpleLSTM(keras.Model):
         self.output_dim = output_dim
         super(SimpleLSTM, self).__init__()
         for i, units in enumerate(self.list_units):
-            if i == 0:
-                setattr(self, f'lstm_{i+1}', layers.LSTM(units, return_sequences=True, name=f'lstm_layer_{i+1}'))
-            else:
-                setattr(self, f'lstm_{i+1}', layers.LSTM(units, return_sequences=False, name=f'lstm_layer_{i+1}'))
+            return_seq = i < len(self.list_units) - 1
+            setattr(self, f'lstm_{i+1}', layers.LSTM(units, return_sequences=return_seq, name=f'lstm_layer_{i+1}'))
+
         self.dense = layers.Dense(self.output_dim, name='output_layer')
 
     def call(self, inputs):

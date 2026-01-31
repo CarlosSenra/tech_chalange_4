@@ -1,0 +1,22 @@
+artifact_path: file:///C:/Users/rafin/projetos/tech_4/mlruns/1/models/m-838d3052fd8c4b279d3ea79bca4c6d47/artifacts
+flavors:
+  python_function:
+    data: data
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.tensorflow
+    python_version: 3.11.9
+  tensorflow:
+    code: null
+    data: data
+    keras_version: 2.15.0
+    model_type: keras
+    save_format: tf
+mlflow_version: 3.8.1
+model_id: m-838d3052fd8c4b279d3ea79bca4c6d47
+model_size_bytes: 4555037
+model_uuid: m-838d3052fd8c4b279d3ea79bca4c6d47
+prompts: null
+run_id: 5ce3eb3fab8d492094eecbeed54c5190
+utc_time_created: '2026-01-31 10:46:24.722469'

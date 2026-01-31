@@ -44,19 +44,44 @@ class Train():
         self.X_train, self.y_train, self.X_test, self.y_test = self.feature_eng.run(janela=5)
 
     def __mlflow_train(self):
-        mlflow.tensorflow.autolog()
         mlflow.set_experiment(self.experiment_name)
         try:
             with mlflow.start_run():
-                self.model.compile(optimizer=self.optimizer, loss=self.loss)
-                self.model.fit(self.X_train, self.y_train, 
-                               epochs=self.epochs, 
-                               batch_size=self.batch_size, 
-                               validation_split=self.validation_split,
-                               verbose=self.verbose)
+                mlflow.log_params({
+                    "optimizer": self.optimizer,
+                    "loss": self.loss,
+                    "epochs": self.epochs,
+                    "batch_size": self.batch_size,
+                    "validation_split": self.validation_split,
+                })
+                self.model.compile(
+                    optimizer=self.optimizer,
+                    loss=self.loss,
+                    metrics=self.metric_list,
+                )
+                history = self.model.fit(
+                    self.X_train, self.y_train,
+                    epochs=self.epochs,
+                    batch_size=self.batch_size,
+                    validation_split=self.validation_split,
+                    verbose=self.verbose,
+                )
+                for epoch, (loss_val, val_loss_val) in enumerate(zip(
+                    history.history["loss"],
+                    history.history["val_loss"],
+                )):
+                    mlflow.log_metrics({"loss": loss_val, "val_loss": val_loss_val}, step=epoch)
                 mlflow.tensorflow.log_model(self.model, "model")
-                mlflow.evaluate(self.model, self.X_test, self.y_test, metric_list=self.metric_list)
-                mlflow.end_run()
+
+                eval_results = self.model.evaluate(
+                    self.X_test, self.y_test, verbose=0
+                )
+                eval_metrics = dict(
+                    zip(self.model.metrics_names, eval_results)
+                )
+                mlflow.log_metrics(
+                    {f"test_{k}": v for k, v in eval_metrics.items()}
+                )
         except Exception as e:
             logger.error(f"Erro ao treinar o modelo: {e}")
             raise e
