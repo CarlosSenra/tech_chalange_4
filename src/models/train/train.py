@@ -1,4 +1,7 @@
 import logging
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
 import mlflow
 from src.models.LSTM.SimpleLSTM import SimpleLSTM
 from src.data.feature_eng import FeatureEng
@@ -10,6 +13,17 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+def mape_metric(y_true, y_pred):
+    """Mean Absolute Percentage Error"""
+    epsilon = tf.keras.backend.epsilon()
+    return tf.reduce_mean(tf.abs((y_true - y_pred) / (y_true + epsilon))) * 100
+
+
+def rmse_metric(y_true, y_pred):
+    """Root Mean Squared Error"""
+    return tf.sqrt(tf.reduce_mean(tf.square(y_true - y_pred)))
+
+
 class Train():
     def __init__(self, model:SimpleLSTM,
                     feature_eng:FeatureEng, 
@@ -18,6 +32,7 @@ class Train():
                     validation_split:float, 
                     verbose:int, 
                     metric_list:list[str], 
+                    validation_metrics:list[str],
                     optimizer:str, 
                     loss:str,
                     experiment_name:str,
@@ -29,6 +44,7 @@ class Train():
         self.validation_split = validation_split
         self.verbose = verbose
         self.metric_list = metric_list
+        self.validation_metrics = validation_metrics
         self.optimizer = optimizer
         self.loss = loss
         self.experiment_name = experiment_name
@@ -54,11 +70,19 @@ class Train():
                     "batch_size": self.batch_size,
                     "validation_split": self.validation_split,
                 })
+                metrics_to_compile = list(self.metric_list)
+                
+                if "mape" in self.validation_metrics:
+                    metrics_to_compile.append(mape_metric)
+                if "rmse" in self.validation_metrics:
+                    metrics_to_compile.append(rmse_metric)
+                
                 self.model.compile(
                     optimizer=self.optimizer,
                     loss=self.loss,
-                    metrics=self.metric_list,
+                    metrics=metrics_to_compile,
                 )
+                
                 history = self.model.fit(
                     self.X_train, self.y_train,
                     epochs=self.epochs,
@@ -66,11 +90,25 @@ class Train():
                     validation_split=self.validation_split,
                     verbose=self.verbose,
                 )
-                for epoch, (loss_val, val_loss_val) in enumerate(zip(
-                    history.history["loss"],
-                    history.history["val_loss"],
-                )):
-                    mlflow.log_metrics({"loss": loss_val, "val_loss": val_loss_val}, step=epoch)
+                
+                for epoch in range(self.epochs):
+                    metrics_to_log = {
+                        "loss": history.history["loss"][epoch],
+                        "val_loss": history.history["val_loss"][epoch],
+                    }
+                    
+                    for metric in self.validation_metrics:
+                        possible_keys = [
+                            f"val_{metric}",
+                            f"val_{metric}_metric",
+                            f"val_{metric}_1",
+                        ]
+                        for key in possible_keys:
+                            if key in history.history:
+                                metrics_to_log[f"val_{metric}"] = history.history[key][epoch]
+                                break
+                    
+                    mlflow.log_metrics(metrics_to_log, step=epoch)
                 mlflow.tensorflow.log_model(self.model, "model")
 
                 eval_results = self.model.evaluate(

@@ -42,6 +42,7 @@ class Container(containers.DeclarativeContainer):
         validation_split=config.models.train.validation_split,
         verbose=config.models.train.verbose,
         metric_list=config.models.train.metric_list,
+        validation_metrics=config.models.train.validation_metrics,
         optimizer=config.models.train.optimizer,
         loss=config.models.train.loss
     )
