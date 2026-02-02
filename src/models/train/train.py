@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 import mlflow
+import mlflow.sklearn
 from src.models.LSTM.SimpleLSTM import SimpleLSTM
 from src.data.feature_eng import FeatureEng
 
@@ -69,6 +70,9 @@ class Train():
                     "epochs": self.epochs,
                     "batch_size": self.batch_size,
                     "validation_split": self.validation_split,
+                    "model_list_units": str(self.model.list_units),
+                    "model_output_dim": self.model.output_dim,
+                    "model_num_layers": len(self.model.list_units),
                 })
                 metrics_to_compile = list(self.metric_list)
                 
@@ -109,6 +113,14 @@ class Train():
                                 break
                     
                     mlflow.log_metrics(metrics_to_log, step=epoch)
+                
+                mlflow.sklearn.log_model(
+                    self.feature_eng.scaler_X, "scaler_X"
+                )
+                mlflow.sklearn.log_model(
+                    self.feature_eng.scaler_y, "scaler_y"
+                )
+                
                 mlflow.tensorflow.log_model(self.model, "model")
 
                 eval_results = self.model.evaluate(
