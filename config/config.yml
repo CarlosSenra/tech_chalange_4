@@ -31,4 +31,5 @@ models:
     loss: "mse"
 
 state:
-  train: true
+  train: false
+  evaluate: true

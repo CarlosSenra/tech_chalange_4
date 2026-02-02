@@ -14,13 +14,14 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def mape_metric(y_true, y_pred):
+
+def mape_metric(y_true, y_pred, sample_weight=None):
     """Mean Absolute Percentage Error"""
     epsilon = tf.keras.backend.epsilon()
     return tf.reduce_mean(tf.abs((y_true - y_pred) / (y_true + epsilon))) * 100
 
 
-def rmse_metric(y_true, y_pred):
+def rmse_metric(y_true, y_pred, sample_weight=None):
     """Root Mean Squared Error"""
     return tf.sqrt(tf.reduce_mean(tf.square(y_true - y_pred)))
 
@@ -49,6 +50,7 @@ class Train():
         self.optimizer = optimizer
         self.loss = loss
         self.experiment_name = experiment_name
+        
     def run(self):
         try:
             self.__apply_feature_eng()

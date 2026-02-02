@@ -3,6 +3,7 @@ from src.data.ingestion import Ingestion
 from src.data.feature_eng import FeatureEng
 from src.models.LSTM.SimpleLSTM import SimpleLSTM
 from src.models.train.train import Train
+from src.models.evaluate.evaluate import Evaluate
 
 class Container(containers.DeclarativeContainer):
 
@@ -45,4 +46,9 @@ class Container(containers.DeclarativeContainer):
         validation_metrics=config.models.train.validation_metrics,
         optimizer=config.models.train.optimizer,
         loss=config.models.train.loss
+    )
+
+    evaluate = providers.Factory(
+        Evaluate,
+        experiment_name=config.models.train.experiment_name
     )
