@@ -3,8 +3,8 @@ from src.container import Container
 container = Container()
 container.config.from_yaml('config/config.yml')
 
-train_state = False
-evaluate_state = True
+train_state = True
+evaluate_state = False
 
 if __name__ == '__main__':
     if train_state:
